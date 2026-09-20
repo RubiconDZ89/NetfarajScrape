@@ -1,1 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecteur StreamFlix</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Inclusion de la bibliothèque HLS.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body class="player-page">
 
+  <!-- Bouton de retour au catalogue -->
+  <a href="index.html" class="btn-back">← Retour au catalogue</a>
+
+  <!-- Conteneur du lecteur vidéo -->
+  <div class="video-container">
+    <video id="video-player" controls autoplay></video>
+  </div>
+
+  <script src="js/player.js"></script>
+</body>
+</html>
