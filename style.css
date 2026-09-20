@@ -1,1 +1,168 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
+body {
+  background-color: #141414;
+  color: #ffffff;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+  z-index: 100;
+}
+
+.logo {
+  color: #E50914;
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.navbar nav a {
+  color: #e5e5e5;
+  text-decoration: none;
+  margin-left: 20px;
+  transition: color 0.3s;
+}
+
+.navbar nav a:hover, .navbar nav a.active {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  height: 60vh;
+  background: url('https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=1200') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  padding: 0 50px;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(0deg, #141414 0%, transparent 100%),
+              linear-gradient(90deg, rgba(0,0,0,0.8) 0%, transparent 60%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 500px;
+}
+
+.hero-content h1 {
+  font-size: 40px;
+  margin-bottom: 15px;
+}
+
+.hero-content p {
+  font-size: 16px;
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.btn-play {
+  background-color: #ffffff;
+  color: #000000;
+  border: none;
+  padding: 12px 28px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-play:hover {
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+/* Catalogue */
+.catalog-container {
+  padding: 20px 40px;
+}
+
+.catalog-container h2 {
+  margin-bottom: 15px;
+  font-size: 22px;
+}
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.movie-card {
+  background-color: #181818;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.movie-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+}
+
+.movie-card img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+}
+
+.card-info {
+  padding: 10px;
+}
+
+.card-info h3 {
+  font-size: 14px;
+}
+
+/* Page du Lecteur Vidéo */
+.player-page {
+  background-color: #000000;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-back {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 18px;
+  padding: 20px;
+  display: inline-block;
+  z-index: 10;
+}
+
+.video-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+video {
+  width: 100%;
+  max-width: 1280px;
+  max-height: 85vh;
+  outline: none;
+  box-shadow: 0 0 20px rgba(0,0,0,0.9);
+}
