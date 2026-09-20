@@ -23,8 +23,17 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <h1 id="hero-title">Chargement...</h1>
-      <p id="hero-desc">Sélectionnez un contenu dans le catalogue ci-dessous.</p>
+      <p id="hero-desc">Sélectionnez un contenu ou importez une liste M3U ci-dessous.</p>
       <button id="hero-play-btn" class="btn-play">▶ Regarder</button>
+    </div>
+  </section>
+
+  <!-- Zone d'importation M3U -->
+  <section class="m3u-input-container">
+    <h3>Importer une liste M3U</h3>
+    <div class="m3u-form">
+      <input type="url" id="m3u-url-input" placeholder="Collez votre lien .m3u ou .m3u8 ici..." required>
+      <button id="load-m3u-btn">Charger le catalogue</button>
     </div>
   </section>
 
