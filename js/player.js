@@ -1,17 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
   const video = document.getElementById('video-player');
 
-  // Récupérer le paramètre 'url' transmis dans l'adresse de la page
+  // Récupération de l'URL passée en paramètre
   const urlParams = new URLSearchParams(window.location.search);
   const rawStreamUrl = urlParams.get('url');
 
   if (!rawStreamUrl) {
-    alert("Aucun flux vidéo spécifié.");
+    alert("Aucune vidéo spécifiée.");
     window.location.href = "index.html";
     return;
   }
 
-  // Passer le flux M3U8 par la fonction serveur Cloudflare pour éviter les blocages CORS
+  // Application du proxy Cloudflare pour contourner CORS
   const proxiedUrl = `/api/proxy?url=${encodeURIComponent(rawStreamUrl)}`;
 
   if (Hls.isSupported()) {
@@ -24,24 +24,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       video.play().catch(() => {
-        console.log("Lecture automatique désactivée par le navigateur. Cliquez sur Play.");
+        console.log("Lecture automatique bloquée par le navigateur.");
       });
     });
 
     hls.on(Hls.Events.ERROR, (event, data) => {
       if (data.fatal) {
-        console.error("Erreur fatale de lecture HLS:", data);
-        // Tentative de secours : essai direct sans passer par le proxy
+        console.error("Erreur HLS fatale :", data);
         if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          // Tentative de repli sans proxy
           hls.loadSource(rawStreamUrl);
         }
       }
     });
 
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    // Lecture native pour les navigateurs sous iOS et Mac (Safari)
+    // Lecture native sous Safari (Mac / iOS)
     video.src = rawStreamUrl;
   } else {
-    alert("Votre navigateur ne supporte pas le format de lecture HLS (.m3u8).");
+    alert("Votre navigateur ne supporte pas la lecture de ce format.");
   }
 });
