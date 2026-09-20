@@ -2,10 +2,10 @@
 // 1. VOTRE LIEN M3U ET DÉMO
 // =========================================================================
 
-// INSÉREZ VOTRE LIEN M3U DANS CETTE VARIABLE :
+// VOTRE LIEN M3U INTÉGRÉ DIRECTEMENT :
 const DEFAULT_M3U_URL = "http://204.52.191.254/get.php?username=0396db83515b&password=cd8f0dd386&type=m3u_plus&output=ts";
 
-// Catalogue de démo (utilisé en cas d'erreur de chargement de votre lien M3U)
+// Catalogue de démo (utilisé uniquement en cas de problème de connexion)
 const fallbackCatalog = [
   {
     title: "Sintel (Film d'animation)",
@@ -29,15 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const loadBtn = document.getElementById('load-m3u-btn');
   const urlInput = document.getElementById('m3u-url-input');
 
-  // Renseigner automatiquement le champ d'entrée avec votre lien
+  // Renseigner le champ de saisie dans l'interface
   if (urlInput) {
     urlInput.value = DEFAULT_M3U_URL;
   }
 
-  // Lancement automatique du chargement de la liste M3U par défaut
+  // Chargement automatique de votre liste M3U au chargement du site
   loadM3UPlaylist(DEFAULT_M3U_URL);
 
-  // Gestion du chargement manuel via le bouton (si l'utilisateur veut tester un autre lien)
+  // Permettre aussi de charger manuellement via le bouton
   if (loadBtn) {
     loadBtn.addEventListener('click', () => {
       const customUrl = urlInput.value.trim();
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Fonction de téléchargement et d'affichage d'un fichier M3U
+ * Fonction de téléchargement et d'affichage du fichier M3U
  */
 async function loadM3UPlaylist(m3uUrl) {
   const loadBtn = document.getElementById('load-m3u-btn');
@@ -62,7 +62,7 @@ async function loadM3UPlaylist(m3uUrl) {
   }
 
   try {
-    // Passage par la fonction Proxy Cloudflare pour contourner le blocage CORS
+    // Contournement CORS et HTTP/HTTPS via la fonction proxy Cloudflare
     const proxiedM3uUrl = `/api/proxy?url=${encodeURIComponent(m3uUrl)}`;
     const response = await fetch(proxiedM3uUrl);
 
@@ -81,8 +81,8 @@ async function loadM3UPlaylist(m3uUrl) {
     renderCatalog(playlistItems);
 
   } catch (error) {
-    console.warn("Erreur de chargement du M3U :", error.message);
-    // En cas d'échec (ex: lien d'exemple non remplacé), affichage du catalogue de démo
+    console.warn("Erreur lors du chargement du M3U :", error.message);
+    // Affichage de secours en cas de problème de réseau
     renderCatalog(fallbackCatalog);
   } finally {
     if (loadBtn) {
@@ -93,7 +93,7 @@ async function loadM3UPlaylist(m3uUrl) {
 }
 
 // =========================================================================
-// 3. ANALYSEUR (PARSER) SYNTAXIQUE DU FICHIER M3U
+// 3. ANALYSEUR SYNTAXIQUE DU FICHIER M3U
 // =========================================================================
 
 function parseM3U(m3uData) {
@@ -111,13 +111,13 @@ function parseM3U(m3uData) {
         streamUrl: ''
       };
 
-      // Extraction du logo si la balise tvg-logo existe
+      // Extraction du logo si présent (tvg-logo)
       const logoMatch = line.match(/tvg-logo="([^"]+)"/i);
       if (logoMatch && logoMatch[1]) {
         currentItem.poster = logoMatch[1];
       }
 
-      // Extraction du titre (après la virgule)
+      // Extraction du nom de la chaîne / du film
       const titleParts = line.split(',');
       if (titleParts.length > 1) {
         currentItem.title = titleParts.slice(1).join(',').trim();
@@ -145,15 +145,15 @@ function renderCatalog(items) {
   if (!grid) return;
   grid.innerHTML = '';
 
-  // Configuration de la bannière principale (Hero)
+  // Mise à jour du bandeau principal (Hero)
   if (items.length > 0) {
     const featured = items[0];
     heroTitle.textContent = featured.title;
-    heroDesc.textContent = featured.description || `Catalogue personnalisé (${items.length} vidéos disponibles).`;
+    heroDesc.textContent = `Catalogue en ligne (${items.length} chaînes/films disponibles).`;
     heroPlayBtn.onclick = () => launchPlayer(featured.streamUrl);
   }
 
-  // Génération des cartes de films/séries dans la grille
+  // Génération des cartes
   items.forEach((item) => {
     const card = document.createElement('div');
     card.className = 'movie-card';
