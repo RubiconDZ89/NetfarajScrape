@@ -1,5 +1,12 @@
-// Catalogue par défaut (démo)
-const defaultCatalog = [
+// =========================================================================
+// 1. VOTRE LIEN M3U ET DÉMO
+// =========================================================================
+
+// INSÉREZ VOTRE LIEN M3U DANS CETTE VARIABLE :
+const DEFAULT_M3U_URL = "http://204.52.191.254/get.php?username=0396db83515b&password=cd8f0dd386&type=m3u_plus&output=ts";
+
+// Catalogue de démo (utilisé en cas d'erreur de chargement de votre lien M3U)
+const fallbackCatalog = [
   {
     title: "Sintel (Film d'animation)",
     description: "Un film d'animation open-source produit par la Fondation Blender.",
@@ -14,56 +21,81 @@ const defaultCatalog = [
   }
 ];
 
+// =========================================================================
+// 2. INITIALISATION ET CHARGEMENT AUTOMATIQUE AU DÉMARRAGE
+// =========================================================================
+
 document.addEventListener('DOMContentLoaded', () => {
   const loadBtn = document.getElementById('load-m3u-btn');
   const urlInput = document.getElementById('m3u-url-input');
 
-  // Affichage initial du catalogue de démo
-  renderCatalog(defaultCatalog);
+  // Renseigner automatiquement le champ d'entrée avec votre lien
+  if (urlInput) {
+    urlInput.value = DEFAULT_M3U_URL;
+  }
 
-  // Gestion du chargement de fichier M3U via URL
+  // Lancement automatique du chargement de la liste M3U par défaut
+  loadM3UPlaylist(DEFAULT_M3U_URL);
+
+  // Gestion du chargement manuel via le bouton (si l'utilisateur veut tester un autre lien)
   if (loadBtn) {
-    loadBtn.addEventListener('click', async () => {
-      const m3uUrl = urlInput.value.trim();
-      if (!m3uUrl) {
+    loadBtn.addEventListener('click', () => {
+      const customUrl = urlInput.value.trim();
+      if (!customUrl) {
         alert("Veuillez entrer une URL M3U valide.");
         return;
       }
-
-      loadBtn.textContent = "Chargement...";
-      loadBtn.disabled = true;
-
-      try {
-        // Passage par le proxy Cloudflare pour éviter le blocage CORS
-        const proxiedM3uUrl = `/api/proxy?url=${encodeURIComponent(m3uUrl)}`;
-        const response = await fetch(proxiedM3uUrl);
-
-        if (!response.ok) {
-          throw new Error("Impossible de télécharger le fichier M3U.");
-        }
-
-        const m3uText = await response.text();
-        const playlistItems = parseM3U(m3uText);
-
-        if (playlistItems.length === 0) {
-          alert("Aucun flux vidéo valide n'a été trouvé dans ce fichier M3U.");
-        } else {
-          renderCatalog(playlistItems);
-        }
-      } catch (error) {
-        console.error("Erreur M3U :", error);
-        alert("Erreur lors du traitement de la liste : " + error.message);
-      } finally {
-        loadBtn.textContent = "Charger le catalogue";
-        loadBtn.disabled = false;
-      }
+      loadM3UPlaylist(customUrl);
     });
   }
 });
 
 /**
- * Analyseur de syntaxe M3U (#EXTINF)
+ * Fonction de téléchargement et d'affichage d'un fichier M3U
  */
+async function loadM3UPlaylist(m3uUrl) {
+  const loadBtn = document.getElementById('load-m3u-btn');
+  
+  if (loadBtn) {
+    loadBtn.textContent = "Chargement...";
+    loadBtn.disabled = true;
+  }
+
+  try {
+    // Passage par la fonction Proxy Cloudflare pour contourner le blocage CORS
+    const proxiedM3uUrl = `/api/proxy?url=${encodeURIComponent(m3uUrl)}`;
+    const response = await fetch(proxiedM3uUrl);
+
+    if (!response.ok) {
+      throw new Error("Impossible d'accéder au fichier M3U.");
+    }
+
+    const m3uText = await response.text();
+    const playlistItems = parseM3U(m3uText);
+
+    if (playlistItems.length === 0) {
+      throw new Error("Aucun flux vidéo valide n'a été trouvé dans le fichier.");
+    }
+
+    // Affichage des éléments extraits
+    renderCatalog(playlistItems);
+
+  } catch (error) {
+    console.warn("Erreur de chargement du M3U :", error.message);
+    // En cas d'échec (ex: lien d'exemple non remplacé), affichage du catalogue de démo
+    renderCatalog(fallbackCatalog);
+  } finally {
+    if (loadBtn) {
+      loadBtn.textContent = "Charger le catalogue";
+      loadBtn.disabled = false;
+    }
+  }
+}
+
+// =========================================================================
+// 3. ANALYSEUR (PARSER) SYNTAXIQUE DU FICHIER M3U
+// =========================================================================
+
 function parseM3U(m3uData) {
   const lines = m3uData.split('\n');
   const items = [];
@@ -79,13 +111,13 @@ function parseM3U(m3uData) {
         streamUrl: ''
       };
 
-      // Extraction du logo si présent
+      // Extraction du logo si la balise tvg-logo existe
       const logoMatch = line.match(/tvg-logo="([^"]+)"/i);
       if (logoMatch && logoMatch[1]) {
         currentItem.poster = logoMatch[1];
       }
 
-      // Extraction du titre
+      // Extraction du titre (après la virgule)
       const titleParts = line.split(',');
       if (titleParts.length > 1) {
         currentItem.title = titleParts.slice(1).join(',').trim();
@@ -100,24 +132,28 @@ function parseM3U(m3uData) {
   return items;
 }
 
-/**
- * Injection des cartes dans l'interface web
- */
+// =========================================================================
+// 4. RENDU VISUEL DANS L'INTERFACE WEB
+// =========================================================================
+
 function renderCatalog(items) {
   const grid = document.getElementById('movie-grid');
   const heroTitle = document.getElementById('hero-title');
   const heroDesc = document.getElementById('hero-desc');
   const heroPlayBtn = document.getElementById('hero-play-btn');
 
+  if (!grid) return;
   grid.innerHTML = '';
 
+  // Configuration de la bannière principale (Hero)
   if (items.length > 0) {
     const featured = items[0];
     heroTitle.textContent = featured.title;
-    heroDesc.textContent = featured.description || `Flux extrait du catalogue (${items.length} contenus disponibles).`;
+    heroDesc.textContent = featured.description || `Catalogue personnalisé (${items.length} vidéos disponibles).`;
     heroPlayBtn.onclick = () => launchPlayer(featured.streamUrl);
   }
 
+  // Génération des cartes de films/séries dans la grille
   items.forEach((item) => {
     const card = document.createElement('div');
     card.className = 'movie-card';
@@ -133,9 +169,10 @@ function renderCatalog(items) {
   });
 }
 
-/**
- * Redirection vers le lecteur vidéo
- */
+// =========================================================================
+// 5. REDIRECTION VERS LE LECTEUR VIDÉO
+// =========================================================================
+
 function launchPlayer(url) {
   window.location.href = `player.html?url=${encodeURIComponent(url)}`;
 }
