@@ -3,18 +3,18 @@ export async function onRequest(context) {
   const targetUrl = url.searchParams.get("url");
 
   if (!targetUrl) {
-    return new Response("Erreur: URL manquante", { status: 400 });
+    return new Response("Erreur: URL cible manquante", { status: 400 });
   }
 
   try {
-    // Télécharge le fichier M3U8 ou le segment TS depuis la source originale
+    // Récupération de la ressource vidéo / M3U distante
     const response = await fetch(targetUrl, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
       }
     });
 
-    // Reconstruit la réponse en autorisant l'accès Cross-Origin (CORS)
+    // Reconstruction avec en-têtes CORS permissifs
     const newHeaders = new Headers(response.headers);
     newHeaders.set("Access-Control-Allow-Origin", "*");
     newHeaders.set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
