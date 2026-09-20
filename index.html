@@ -1,68 +1,41 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exercice - Lecteur Vidéo Unique</title>
-    <!-- Inclusion de la bibliothèque HLS.js -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .container {
-            width: 90%;
-            max-width: 800px;
-            text-align: center;
-        }
-        video {
-            width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            background: #000;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamFlix - Votre Plateforme de Streaming</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-    <h1>Test de Lecteur HLS Custom</h1>
-    <video id="videoPlayer" controls></video>
-</div>
+  <!-- Barre de navigation -->
+  <header class="navbar">
+    <div class="logo">STREAMFLIX</div>
+    <nav>
+      <a href="#" class="active">Accueil</a>
+      <a href="#">Séries</a>
+      <a href="#">Films</a>
+    </nav>
+  </header>
 
-<script>
-    const video = document.getElementById('videoPlayer');
+  <!-- Bannière principale (Hero) -->
+  <section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 id="hero-title">Chargement...</h1>
+      <p id="hero-desc">Sélectionnez un contenu dans le catalogue ci-dessous.</p>
+      <button id="hero-play-btn" class="btn-play">▶ Regarder</button>
+    </div>
+  </section>
 
-    // 1. Remplacez par l'URL de votre Cloudflare Worker déployé
-    const WORKER_URL = 'https://votre-worker.votre-nom.workers.dev';
+  <!-- Catalogue de contenus -->
+  <main class="catalog-container">
+    <h2>En vedette</h2>
+    <div class="movie-grid" id="movie-grid">
+      <!-- Les cartes seront générées dynamiquement par app.js -->
+    </div>
+  </main>
 
-    // 2. La vidéo unique de votre exercice
-    const videoSource = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
-
-    // 3. Construction de l'URL finale
-    const proxiedStreamUrl = `${WORKER_URL}?url=${encodeURIComponent(videoSource)}`;
-
-    // 4. Initialisation du lecteur
-    if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(proxiedStreamUrl);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            console.log('Vidéo prête à être lue.');
-        });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // Fallback pour Safari qui supporte le HLS nativement
-        video.src = proxiedStreamUrl;
-    }
-</script>
-
+  <script src="js/app.js"></script>
 </body>
 </html>
