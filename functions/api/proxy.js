@@ -7,24 +7,31 @@ export async function onRequest(context) {
   }
 
   try {
-    // Récupération de la ressource vidéo / M3U distante
+    // Forcer la requête vers le serveur distant
     const response = await fetch(targetUrl, {
+      method: "GET",
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Accept": "*/*"
       }
     });
 
-    // Reconstruction avec en-têtes CORS permissifs
-    const newHeaders = new Headers(response.headers);
-    newHeaders.set("Access-Control-Allow-Origin", "*");
-    newHeaders.set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-    newHeaders.set("Access-Control-Allow-Headers", "*");
+    if (!response.ok) {
+      return new Response(`Erreur distante: ${response.status} ${response.statusText}`, { status: response.status });
+    }
 
-    return new Response(response.body, {
-      status: response.status,
-      headers: newHeaders
+    const data = await response.arrayBuffer();
+
+    return new Response(data, {
+      status: 200,
+      headers: {
+        "Content-Type": response.headers.get("Content-Type") || "text/plain; charset=utf-8",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Access-Control-Allow-Headers": "*"
+      }
     });
   } catch (err) {
-    return new Response("Erreur serveur lors de la récupération du flux : " + err.message, { status: 500 });
+    return new Response("Erreur serveur lors de la récupération : " + err.message, { status: 500 });
   }
 }
